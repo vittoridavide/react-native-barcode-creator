@@ -110,6 +110,7 @@ class BarcodeCreatorView : UIView {
           }
 
           filter.setValue(data, forKey: "inputMessage")
+          filter.setValue(0, forKey: "inputQuietSpace")
 
           guard let ciImage = filter.outputImage else {
               return
