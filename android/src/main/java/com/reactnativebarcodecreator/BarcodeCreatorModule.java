@@ -5,12 +5,17 @@ import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
+import com.facebook.react.module.annotations.ReactModule;
 import com.google.zxing.BarcodeFormat;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@ReactModule(name = BarcodeCreatorModule.NAME)
 public class BarcodeCreatorModule extends ReactContextBaseJavaModule {
+  
+  public static final String NAME = "BarcodeCreatorModule";
+  
   public BarcodeCreatorModule(ReactApplicationContext reactContext) {
     super(reactContext);
   }
@@ -31,6 +36,6 @@ public class BarcodeCreatorModule extends ReactContextBaseJavaModule {
   @NonNull
   @Override
   public String getName() {
-    return "BarcodeCreatorViewManager";
+    return NAME;
   }
 }

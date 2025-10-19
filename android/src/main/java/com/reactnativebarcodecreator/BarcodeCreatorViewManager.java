@@ -13,6 +13,10 @@ import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewProps;
 import com.facebook.react.uimanager.annotations.ReactProp;
+import com.facebook.react.uimanager.events.RCTEventEmitter;
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.common.MapBuilder;
 import com.google.zxing.BarcodeFormat;
 
 import java.io.ByteArrayOutputStream;
@@ -25,7 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BarcodeCreatorViewManager extends SimpleViewManager<View> {
+public class BarcodeCreatorViewManager extends BarcodeCreatorViewManagerSpec<BarcodeView> {
     public static final String REACT_CLASS = "BarcodeCreatorView";
 
     ReactApplicationContext mCallerContext;
@@ -89,6 +93,52 @@ public class BarcodeCreatorViewManager extends SimpleViewManager<View> {
 
   @ReactProp(name = ViewProps.HEIGHT, defaultInt = 100)
   public void setHeight(BarcodeView view, @Nullable int height) {
+    view.setHeight(height);
+  }
+
+  @Override
+  public Map<String, Object> getExportedCustomDirectEventTypeConstants() {
+    Map<String, Object> export = new HashMap<>();
+    export.put("onBarcodeError", MapBuilder.of("registrationName", "onBarcodeError"));
+    return export;
+  }
+
+  // Implement abstract methods from BarcodeCreatorViewManagerSpec for Fabric compatibility
+  @Override
+  public void setFormat(BarcodeView view, @Nullable String format) {
+    if (format != null) {
+      view.setFormat(BarcodeFormat.valueOf(format));
+    }
+  }
+
+  @Override
+  public void setValue(BarcodeView view, @Nullable String value) {
+    if (value != null) {
+      view.setContent(value);
+    }
+  }
+
+  @Override
+  public void setBackground(BarcodeView view, @Nullable String color) {
+    if (color != null) {
+      view.setBackgroundColor(color);
+    }
+  }
+
+  @Override
+  public void setForegroundColor(BarcodeView view, @Nullable String color) {
+    if (color != null) {
+      view.setForegroundColor(color);
+    }
+  }
+
+  @Override
+  public void setWidth(BarcodeView view, int width) {
+    view.setWidth(width);
+  }
+
+  @Override
+  public void setHeight(BarcodeView view, int height) {
     view.setHeight(height);
   }
 

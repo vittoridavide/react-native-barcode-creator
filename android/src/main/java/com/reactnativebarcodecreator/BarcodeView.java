@@ -8,7 +8,9 @@ import android.graphics.Color;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.modules.core.ExceptionsManagerModule;
+import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
@@ -73,6 +75,7 @@ public class BarcodeView extends androidx.appcompat.widget.AppCompatImageView {
       updateQRCodeView();
     }catch (Exception e) {
       showException(context, e);
+      emitErrorEvent("Color parsing error: " + e.getMessage());
       e.printStackTrace();
     }
   }
@@ -84,6 +87,7 @@ public class BarcodeView extends androidx.appcompat.widget.AppCompatImageView {
       updateQRCodeView();
     }catch (Exception e) {
       showException(context, e);
+      emitErrorEvent("Background color parsing error: " + e.getMessage());
       e.printStackTrace();
     }
   }
@@ -99,6 +103,7 @@ public class BarcodeView extends androidx.appcompat.widget.AppCompatImageView {
       setImageBitmap(bitmap);
     } catch (Exception e) {
       showException(context, e);
+      emitErrorEvent("Barcode generation error: " + e.getMessage());
       e.printStackTrace();
     }
   }
@@ -108,5 +113,15 @@ public class BarcodeView extends androidx.appcompat.widget.AppCompatImageView {
   public BarcodeView(ReactContext context) {
     super(context);
     this.context = context;
+  }
+
+  private void emitErrorEvent(String error) {
+    WritableMap event = Arguments.createMap();
+    event.putString("error", error);
+    
+    ReactContext reactContext = (ReactContext) getContext();
+    reactContext
+      .getJSModule(RCTEventEmitter.class)
+      .receiveEvent(getId(), "onBarcodeError", event);
   }
 }

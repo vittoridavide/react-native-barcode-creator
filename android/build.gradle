@@ -85,5 +85,10 @@ dependencies {
   implementation 'com.google.zxing:core:3.5.3'
   implementation 'androidx.annotation:annotation:1.1.0'
 
+  if (isNewArchitectureEnabled()) {
+    // New Architecture (Fabric) dependencies
+    implementation "com.facebook.react:react-android"
+    implementation "com.facebook.react:hermes-android"
+  }
 }
 
