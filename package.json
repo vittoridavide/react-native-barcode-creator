@@ -161,5 +161,17 @@
         }
       ]
     ]
+  },
+  "codegenConfig": {
+    "name": "RNBarcodeCreatorSpec",
+    "type": "components",
+    "jsSrcsDir": "src",
+    "android": {
+      "javaPackageName": "com.reactnativebarcodecreator"
+    },
+    "ios": {
+      "appName": "react-native-barcode-creator",
+      "framework": "React"
+    }
   }
 }
