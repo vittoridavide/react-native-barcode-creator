@@ -8,7 +8,7 @@ import {
 
 // Import Fabric components (will be ignored in legacy mode)
 import BarcodeCreatorViewNativeComponent from './BarcodeCreatorViewNativeComponent';
-import NativeBarcodeCreator from './NativeBarcodeCreator';
+import NativeBarcodeCreator from './NativeBarcodeCreatorModule';
 
 const LINKING_ERROR =
   `The package 'react-native-barcode-creator' doesn't seem to be linked. Make sure: \n\n` +
