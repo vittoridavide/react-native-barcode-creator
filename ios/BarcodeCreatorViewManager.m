@@ -9,4 +9,7 @@ RCT_EXPORT_VIEW_PROPERTY(background, UIColor)
 RCT_EXPORT_VIEW_PROPERTY(valueByteArray, NSArray)
 RCT_EXPORT_VIEW_PROPERTY(encodedValue, NSDictionary)
 
+// Event support
+RCT_EXPORT_VIEW_PROPERTY(onBarcodeError, RCTDirectEventBlock)
+
 @end
