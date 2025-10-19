@@ -1,5 +1,4 @@
 import {
-  requireNativeComponent,
   UIManager,
   Platform,
   type ViewStyle,
@@ -7,13 +6,14 @@ import {
 } from 'react-native';
 
 // Import Fabric components (will be ignored in legacy mode)
-import BarcodeCreatorViewNativeComponent from './NativeBarcodeCreatorView';
+import NativeBarcodeCreatorView from './NativeBarcodeCreatorView';
+import LegacyBarcodeCreatorView from './LegacyBarcodeCreatorView';
 import NativeBarcodeCreator from './NativeBarcodeCreatorModule';
 
 const LINKING_ERROR =
   `The package 'react-native-barcode-creator' doesn't seem to be linked. Make sure: \n\n` +
   Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +
-  '- You rebuilt the app after installing the package\n';
+  '- You rebuilt the app after installing the package\n'
 
 export type BarcodeCreatorProps = {
   format: string;
@@ -32,33 +32,39 @@ export type BarcodeCreatorProps = {
 
 const ComponentName = 'BarcodeCreatorView';
 
-// Check if we're running with New Architecture (Fabric)
-const isFabricEnabled = (global as any).nativeFabricUIManager != null;
+// Auto-detect Old vs New Architecture at runtime using multiple signals
+const isFabricEnabled = Boolean(
+  // RN >=0.72 sets this global
+  (global as any).nativeFabricUIManager ||
+  // Platform.constants heuristic
+  (Platform as any)?.constants?.reactNativeVersion?.fabric === true
+);
 
+// Unified component wrapper with graceful fallback
 export const BarcodeCreatorView = isFabricEnabled
-  ? BarcodeCreatorViewNativeComponent
+  ? NativeBarcodeCreatorView
   : UIManager.getViewManagerConfig(ComponentName) != null
-  ? requireNativeComponent<BarcodeCreatorProps>(ComponentName)
+  ? LegacyBarcodeCreatorView
   : () => {
-      throw new Error(LINKING_ERROR);
+      throw new Error(
+        LINKING_ERROR +
+          '\n- Neither Fabric nor legacy view manager is available. Please ensure codegen/pods are installed.'
+      );
     };
 
 // Constants export with Fabric/Legacy support
 const getConstants = () => {
-  if (isFabricEnabled) {
-    try {
-      return NativeBarcodeCreator.getConstants();
-    } catch (error) {
-      console.warn('Fabric constants not available, falling back to legacy');
-    }
-  }
+  // Prefer TurboModule when available (New Architecture)
+  try {
+    return NativeBarcodeCreator.getConstants();
+  } catch {}
 
   // Legacy fallback
-  if (NativeModules.BarcodeCreatorModule) {
+  if (NativeModules.BarcodeCreatorModule?.getConstants) {
     return NativeModules.BarcodeCreatorModule.getConstants();
   }
 
-  // Final fallback with hardcoded values
+  // Final fallback with hardcoded values to avoid runtime errors
   return {
     AZTEC: 'AZTEC',
     CODE128: 'CODE_128',
@@ -66,7 +72,7 @@ const getConstants = () => {
     QR: 'QR_CODE',
     EAN13: 'EAN_13',
     UPCA: 'UPC_A',
-  };
+  } as const;
 };
 
 const constants = getConstants();
