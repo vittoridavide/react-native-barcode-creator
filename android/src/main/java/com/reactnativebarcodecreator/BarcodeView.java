@@ -1,5 +1,7 @@
 package com.reactnativebarcodecreator;
 
+import java.util.HashMap;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -10,6 +12,7 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.modules.core.ExceptionsManagerModule;
 import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
 
@@ -93,6 +96,8 @@ public class BarcodeView extends androidx.appcompat.widget.AppCompatImageView {
 
     MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
     try {
+      HashMap<EncodeHintType, Integer> hintMap = new HashMap<>();
+      hintMap.put(EncodeHintType.MARGIN, 0);
       BitMatrix bitMatrix = multiFormatWriter.encode(content, format, width, height);
       BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
       Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix, background, foregroundColor);
