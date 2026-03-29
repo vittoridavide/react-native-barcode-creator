@@ -1,6 +1,6 @@
 {
   "name": "react-native-barcode-creator",
-  "version": "0.2.0",
+  "version": "0.2.0-beta.0",
   "description": "Component to generate QRCode, Code128, PDF417, AZTEC, EAN-13 and UPC-A natively for react native.",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
