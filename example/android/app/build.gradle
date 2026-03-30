@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.vittoridavid.example'
+    namespace 'com.vittoridavid.rnbcapp55'
     defaultConfig {
-        applicationId 'com.vittoridavid.example'
+        applicationId 'com.vittoridavid.rnbcapp55'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

@@ -24,7 +24,8 @@
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="example"/>
+        <data android:scheme="rnbcapp55"/>
+        <data android:scheme="exp+rnbc-app-55"/>
       </intent-filter>
     </activity>
   </application>
