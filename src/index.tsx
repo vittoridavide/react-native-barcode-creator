@@ -1,39 +1,122 @@
-import {
-  requireNativeComponent,
-  UIManager,
-  Platform,
-  type ViewStyle,
-  NativeModules,
-} from 'react-native';
+import React from 'react';
+import type { ComponentType } from 'react';
+import type { ViewStyle } from 'react-native';
+import type { NativeProps } from './BarcodeCreatorNativeComponent';
 
-const LINKING_ERROR =
-  `The package 'react-native-barcode-creator' doesn't seem to be linked. Make sure: \n\n` +
-  Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +
-  '- You rebuilt the app after installing the package\n'
-
-type BarcodeCreatorProps = {
-  format: string;
-  value: string;
-  background: string;
-  foregroundColor: string;
-  style: ViewStyle;
-};
-
-const ComponentName = 'BarcodeCreatorView';
-
-export const BarcodeCreatorView =
-  UIManager.getViewManagerConfig(ComponentName) != null
-    ? requireNativeComponent<BarcodeCreatorProps>(ComponentName)
-    : () => {
-        throw new Error(LINKING_ERROR);
-      };
 export const BarcodeFormat = {
-  AZTEC: NativeModules.BarcodeCreatorViewManager.getConstants().AZTEC,
-  CODE128: NativeModules.BarcodeCreatorViewManager.getConstants().CODE128,
-  PDF417: NativeModules.BarcodeCreatorViewManager.getConstants().PDF417,
-  QR: NativeModules.BarcodeCreatorViewManager.getConstants().QR,
-  EAN13: NativeModules.BarcodeCreatorViewManager.getConstants().EAN13,
-  UPCA: NativeModules.BarcodeCreatorViewManager.getConstants().UPCA,
+  AZTEC: 'AZTEC',
+  CODE128: 'CODE_128',
+  PDF417: 'PDF_417',
+  QR: 'QR_CODE',
+  EAN13: 'EAN_13',
+  UPCA: 'UPC_A',
+} as const;
+
+export type BarcodeFormatValue =
+  (typeof BarcodeFormat)[keyof typeof BarcodeFormat];
+
+/** Numeric-only formats and their expected digit lengths. */
+const NUMERIC_FORMAT_RULES: Partial<
+  Record<BarcodeFormatValue, { name: string; minDigits: number; maxDigits: number }>
+> = {
+  [BarcodeFormat.UPCA]: { name: 'UPC_A', minDigits: 11, maxDigits: 12 },
+  [BarcodeFormat.EAN13]: { name: 'EAN_13', minDigits: 12, maxDigits: 13 },
 };
 
-export type { BarcodeCreatorProps };
+function warnIfInvalidValue(
+  format: BarcodeFormatValue | undefined,
+  value: string | undefined
+): void {
+  if (!format || value == null) return;
+  const rule = NUMERIC_FORMAT_RULES[format];
+  if (!rule) return;
+
+  if (!/^\d+$/.test(value)) {
+    console.warn(
+      `[BarcodeCreator] ${rule.name} requires numeric digits only. Received: "${value}"`
+    );
+  } else if (value.length < rule.minDigits || value.length > rule.maxDigits) {
+    console.warn(
+      `[BarcodeCreator] ${rule.name} expects ${rule.minDigits}-${rule.maxDigits} digits. Received ${value.length} digits.`
+    );
+  }
+}
+
+export type EncodedValue = {
+  base64: string;
+  messageEncoded: string;
+};
+
+export type BarcodeCreatorProps = {
+  format?: BarcodeFormatValue;
+  value?: string;
+  encodedValue?: EncodedValue;
+  background?: string;
+  foregroundColor?: string;
+  style?: ViewStyle;
+};
+
+let NativeBarcodeCreatorView: ComponentType<NativeProps> | null = null;
+
+const getNativeBarcodeCreatorView = (): ComponentType<NativeProps> => {
+  if (NativeBarcodeCreatorView != null) {
+    return NativeBarcodeCreatorView;
+  }
+  const reactNativeModule = require('react-native') as
+    | {
+        Platform?: {
+          OS?: string;
+        };
+      }
+    | undefined;
+  const platform = reactNativeModule?.Platform?.OS;
+
+  if (platform !== 'ios' && platform !== 'android') {
+    const UnsupportedBarcodeCreatorView = (() => {
+      throw new Error(
+        `react-native-barcode-creator is not supported on platform "${platform ?? 'unknown'}".`
+      );
+    }) as ComponentType<NativeProps>;
+    NativeBarcodeCreatorView = UnsupportedBarcodeCreatorView;
+    return UnsupportedBarcodeCreatorView;
+  }
+
+  const nativeComponentModule = require('./BarcodeCreatorNativeComponent') as
+    | ComponentType<NativeProps>
+    | { default?: ComponentType<NativeProps> };
+  const BarcodeCreatorNativeComponent =
+    (typeof nativeComponentModule === 'object' &&
+    nativeComponentModule != null &&
+    'default' in nativeComponentModule
+      ? nativeComponentModule.default
+      : nativeComponentModule) as ComponentType<NativeProps> | undefined;
+
+  if (BarcodeCreatorNativeComponent == null) {
+    throw new Error(
+      'react-native-barcode-creator failed to load its native component.'
+    );
+  }
+  NativeBarcodeCreatorView = BarcodeCreatorNativeComponent;
+  return BarcodeCreatorNativeComponent;
+};
+export const BarcodeCreatorView = ({
+  encodedValue,
+  value,
+  format,
+  ...props
+}: BarcodeCreatorProps) => {
+  if (__DEV__) {
+    warnIfInvalidValue(format, value);
+  }
+
+  const NativeComponent = getNativeBarcodeCreatorView();
+  return (
+    <NativeComponent
+      {...props}
+      format={format}
+      value={encodedValue == null ? value : undefined}
+      encodedValueBase64={encodedValue?.base64}
+      messageEncoded={encodedValue?.messageEncoded}
+    />
+  );
+};
