@@ -1,6 +1,9 @@
 <div align="center">
   <br />
-  <img src="https://randomstuffshared.s3.eu-west-2.amazonaws.com/logo_rnbc.png" alt="RNBC" width="140" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://randomstuffshared.s3.eu-west-2.amazonaws.com/rnbc-white.png" />
+    <img src="https://randomstuffshared.s3.eu-west-2.amazonaws.com/logo_rnbc.png" alt="RNBC" width="140" />
+  </picture>
   <p><strong>Barcode Creator</strong></p>
   <br />
   <p>
